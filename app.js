@@ -5,11 +5,13 @@ const sliders = document.querySelectorAll('input[type="range"]');
 const currentHexes = document.querySelectorAll(".color h2");
 const popup = document.querySelector('.copy-container');
 const adjustButton = document.querySelectorAll('.adjust');
+const lockButton = document.querySelectorAll('.lock');
 const closeAdjustments = document.querySelectorAll('.close-adjustment');
 const sliderContainer = document.querySelectorAll(".sliders");
 let initialColors;
 
 //Add event listeners
+generateBtn.addEventListener("click", randomColors);
 sliders.forEach(slider =>{
     slider.addEventListener("input", hslControls);
 });
@@ -39,6 +41,12 @@ closeAdjustments.forEach((button,index) =>{
         closeAdjustmentPanel(index);
     });
 });
+lockButton.forEach((button, index) => {
+    button.addEventListener("click", e => {
+      lockLayer(e, index);
+    });
+  });
+  
 //Functions
 
 
@@ -59,7 +67,12 @@ function randomColors() {
         const hexText = div.children[0];
         const randomColor = generateHex();
         //Add it to array
+        if (div.classList.contains("locked")) {
+            initialColors.push(hexText.innerText);
+            return;
+        } else {
         initialColors.push(chroma(randomColor).hex());
+        }
 
         //Add color to background
         div.style.backgroundColor = randomColor;
@@ -77,6 +90,11 @@ function randomColors() {
     });
     //Reset Inputs
     resetInputs();
+    //Check for button contrast
+    adjustButton.forEach((button,index) => {
+    checkTextContrast(initialColors[index],button);
+    checkTextContrast(initialColors[index], lockButton[index]);
+    });
 }
 
 function checkTextContrast(color,text){
@@ -185,4 +203,20 @@ function openAdjustmentPanel(index){
 function closeAdjustmentPanel(index){
     sliderContainer[index].classList.remove("active");
 }
+
+function lockLayer(e, index) {
+    const lockSVG = e.target.children[0];
+    const activeBg = colorDivs[index];
+    activeBg.classList.toggle("locked");
+  
+    if (lockSVG.classList.contains("fa-lock-open")) {
+      e.target.innerHTML = '<i class="fas fa-lock"></i>';
+    } else {
+      e.target.innerHTML = '<i class="fas fa-lock-open"></i>';
+    }
+  }
+  
+
+
+
 randomColors();
